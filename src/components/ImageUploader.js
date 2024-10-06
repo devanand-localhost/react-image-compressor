@@ -337,7 +337,8 @@ const ImageUploader = () => {
             <Button onClick={handleCompression} disabled={isProcessing}>
               {isProcessing ? 'Processing...' : (
                 <>
-                  <FaCompress style={{ marginRight: '5px' }} /> Compress Image
+                  <FaCompress style={{ marginRight: '5px' }} />
+                  {(showError || compressedImage) ? 'Compress Image Again' : 'Compress Image'}
                 </>
               )}
             </Button>

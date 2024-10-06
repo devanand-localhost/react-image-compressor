@@ -5,7 +5,7 @@ import { FaCompress, FaDownload, FaImage, FaUpload } from 'react-icons/fa';
 
 const Container = styled.div`
   display: flex;
-  justify-content: center; /* Center the entire container horizontally */
+  justify-content: center;
   align-items: flex-start;
   width: 100%;
   max-width: 1000px;
@@ -155,6 +155,17 @@ const WarningText = styled.p`
   }
 `;
 
+const ErrorText = styled.p`
+  color: red;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
+
 const HelperText = styled.p`
   font-size: 20px;
   font-weight: bold;
@@ -183,8 +194,8 @@ const ImageUploader = () => {
   const [fileName, setFileName] = useState('');
   const [compressionRate, setCompressionRate] = useState(70);
   const [showWarning, setShowWarning] = useState(false);
-  const [isCompressed, setIsCompressed] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const formatSize = (sizeInBytes) => {
     if (sizeInBytes < 1024 * 1024) {
@@ -199,6 +210,8 @@ const ImageUploader = () => {
       setSelectedImage(URL.createObjectURL(file));
       setOriginalSize(file.size);
       setFileName(file.name);
+      setShowError(false);
+      setCompressedImage(null); // Reset compressed image when a new file is uploaded
     } else {
       alert('Please select an image file');
     }
@@ -229,10 +242,16 @@ const ImageUploader = () => {
       effectiveCompressionRate,
       0,
       (uri) => {
-        setCompressedImage(uri);
         const base64StringLength = uri.length * (3 / 4) - (uri.indexOf('=') > 0 ? uri.length - uri.indexOf('=') : 0);
         setCompressedSize(base64StringLength);
-        setIsCompressed(true);
+        if (base64StringLength > originalSize) {
+          // If compressed size exceeds original size
+          setShowError(true);
+          setCompressedImage(null); // Clear the compressed image if there's an error
+        } else {
+          setCompressedImage(uri);
+          setShowError(false);
+        }
         setIsProcessing(false);
       },
       'base64'
@@ -291,11 +310,8 @@ const ImageUploader = () => {
               max="100"
               value={compressionRate}
               onChange={(e) => setCompressionRate(parseInt(e.target.value))}
-              disabled={!!compressedImage}
             />
             <p>Compression Rate: {compressionRate}%</p>
-
-
 
             {showWarning && (
               <WarningText>
@@ -318,29 +334,34 @@ const ImageUploader = () => {
               </tbody>
             </InfoTable>
 
-            {!isCompressed && (
-              <Button onClick={handleCompression} disabled={isProcessing}>
-                {isProcessing ? 'Processing...' : (
-                  <>
-                    <FaCompress style={{ marginRight: '5px' }} /> Compress Image
-                  </>
-                )}
-              </Button>
-            )}
+            <Button onClick={handleCompression} disabled={isProcessing}>
+              {isProcessing ? 'Processing...' : (
+                <>
+                  <FaCompress style={{ marginRight: '5px' }} /> Compress Image
+                </>
+              )}
+            </Button>
           </>
         )}
 
-        {compressedImage && (
+        {showError && (
+          <ErrorText>
+            Image cannot be compressed this much because of its properties. Please try changing Compression Rate.
+          </ErrorText>
+        )}
+
+        {compressedImage && !showError && (
           <>
-            <div>
-              <Button onClick={() => downloadCompressedImage(compressedImage)}>
-                <FaDownload style={{ marginRight: '5px' }} /> Download Compressed Image
-              </Button>
-              <CompressAnotherButton onClick={handleCompressAnother}>
-                <FaImage style={{ marginRight: '5px' }} /> Compress Another Image
-              </CompressAnotherButton>
-            </div>
+            <Button onClick={() => downloadCompressedImage(compressedImage)}>
+              <FaDownload style={{ marginRight: '5px' }} /> Download Compressed Image
+            </Button>
           </>
+        )}
+
+        {(compressedImage || showError) && (
+          <CompressAnotherButton onClick={handleCompressAnother}>
+            <FaImage style={{ marginRight: '5px' }} /> Compress Another Image
+          </CompressAnotherButton>
         )}
       </ControlContainer>
     </Container>

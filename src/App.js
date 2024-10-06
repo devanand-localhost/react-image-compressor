@@ -14,7 +14,7 @@ const App = () => {
 
   return (
     <AppWrapper>
-      <h1>Image Compressor (by Deva)</h1>
+      <h1>Image Compressor <br />(by Deva)</h1>
       <ImageUploader />
     </AppWrapper>
   );

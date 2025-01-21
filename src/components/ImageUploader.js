@@ -1,202 +1,33 @@
+// Import React and hooks for state management
 import React, { useState } from 'react';
+// Import Resizer for image compression
 import Resizer from 'react-image-file-resizer';
-import styled from 'styled-components';
-import { FaCompress, FaDownload, FaImage, FaUpload } from 'react-icons/fa';
-
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  margin-top: 20px;
-  font-family: 'Arial', sans-serif;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const ImageContainer = styled.div`
-  width: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const ControlContainer = styled.div`
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding-left: 20px;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    padding-left: 0;
-    margin-top: 20px;
-  }
-`;
-
-const ImagePreview = styled.img`
-  max-width: 100%;
-  max-height: 80vh;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 2px solid #ddd;
-
-  @media (max-width: 768px) {
-    max-height: 60vh;
-  }
-`;
-
-const Button = styled.button`
-  background-color: #4caf50;
-  color: white;
-  padding: 15px;
-  margin-top: 20px;
-  margin-right: 10px;
-  font-size: 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  width: 100%;
-
-  &:hover {
-    background-color: #45a049;
-  }
-
-  &:disabled {
-    background-color: #a5a5a5;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-    padding: 12px;
-  }
-`;
-
-const CompressAnotherButton = styled(Button)`
-  background-color: #007bff;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-const InfoTable = styled.table`
-  width: 100%;
-  margin-top: 20px;
-  font-size: 16px;
-  border-collapse: collapse;
-  text-align: left;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
-const TableRow = styled.tr`
-  border-bottom: 1px solid #ddd;
-`;
-
-const TableData = styled.td`
-  padding: 10px;
-`;
-
-const FileInput = styled.input`
-  display: none;
-`;
-
-const FileLabel = styled.label`
-  background-color: #4caf50;
-  color: white;
-  padding: 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  margin-top: 20px;
-
-  &:hover {
-    background-color: #45a049;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 16px;
-    padding: 12px;
-  }
-`;
-
-const Slider = styled.input`
-  margin-top: 20px;
-  width: 100%;
-`;
-
-const WarningText = styled.p`
-  color: #daa520;
-  font-weight: bold;
-  font-size: 16px;
-  margin-top: 10px;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
-const ErrorText = styled.p`
-  color: red;
-  font-weight: bold;
-  font-size: 16px;
-  margin-top: 10px;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
-const HelperText = styled.p`
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #007bff;
-  text-align: center;
-  font-family: 'Roboto Condensed', sans-serif;
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-  }
-`;
-
-const CenteredInputContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-`;
+// Import icons for UI components
+import { FaCompress, FaDownload, FaUpload } from 'react-icons/fa';
+// Import external CSS file
+import './ImageUploader.css';
 
 const ImageUploader = () => {
+  // State to store the selected image file
   const [selectedImage, setSelectedImage] = useState(null);
+  // State to store the compressed image
   const [compressedImage, setCompressedImage] = useState(null);
+  // State to store the original image size in bytes
   const [originalSize, setOriginalSize] = useState(0);
+  // State to store the compressed image size in bytes
   const [compressedSize, setCompressedSize] = useState(0);
+  // State to store the name of the uploaded file
   const [fileName, setFileName] = useState('');
+  // State to manage the compression rate (default 70%)
   const [compressionRate, setCompressionRate] = useState(70);
+  // State to show a warning for high compression rates
   const [showWarning, setShowWarning] = useState(false);
+  // State to indicate whether the compression process is ongoing
   const [isProcessing, setIsProcessing] = useState(false);
+  // State to show an error message if compression fails
   const [showError, setShowError] = useState(false);
 
+  // Helper function to format file sizes into KB/MB
   const formatSize = (sizeInBytes) => {
     if (sizeInBytes < 1024 * 1024) {
       return `${(sizeInBytes / 1024).toFixed(2)} KB`;
@@ -204,6 +35,7 @@ const ImageUploader = () => {
     return `${(sizeInBytes / 1024 / 1024).toFixed(2)} MB`;
   };
 
+  // Handle the file upload and update state accordingly
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
@@ -211,29 +43,34 @@ const ImageUploader = () => {
       setOriginalSize(file.size);
       setFileName(file.name);
       setShowError(false);
-      setCompressedImage(null); // Reset compressed image when a new file is uploaded
+      setCompressedImage(null); // Reset compressed image on new upload
     } else {
       alert('Please select an image file');
     }
   };
 
+  // Handle the image compression process
   const handleCompression = () => {
     if (!selectedImage) {
-      alert("Please select an image first.");
+      alert('Please select an image first.');
       return;
     }
 
+    // Show a warning if compression rate exceeds 85%
     if (compressionRate > 85) {
       setShowWarning(true);
     } else {
       setShowWarning(false);
     }
 
+    // Calculate the effective compression rate
     const effectiveCompressionRate = 100 - compressionRate;
 
+    // Get the file object from the file input
     const file = document.querySelector('input[type="file"]').files[0];
     setIsProcessing(true);
 
+    // Use Resizer to compress the image
     Resizer.imageFileResizer(
       file,
       file.width,
@@ -242,12 +79,12 @@ const ImageUploader = () => {
       effectiveCompressionRate,
       0,
       (uri) => {
-        const base64StringLength = uri.length * (3 / 4) - (uri.indexOf('=') > 0 ? uri.length - uri.indexOf('=') : 0);
+        const base64StringLength =
+          uri.length * (3 / 4) - (uri.indexOf('=') > 0 ? uri.length - uri.indexOf('=') : 0);
         setCompressedSize(base64StringLength);
         if (base64StringLength > originalSize) {
-          // If compressed size exceeds original size
           setShowError(true);
-          setCompressedImage(null); // Clear the compressed image if there's an error
+          setCompressedImage(null); // Clear compressed image if error occurs
         } else {
           setCompressedImage(uri);
           setShowError(false);
@@ -258,10 +95,7 @@ const ImageUploader = () => {
     );
   };
 
-  const handleCompressAnother = () => {
-    window.location.reload();
-  };
-
+  // Function to download the compressed image
   const downloadCompressedImage = (dataUrl) => {
     const a = document.createElement('a');
     a.href = dataUrl;
@@ -271,101 +105,108 @@ const ImageUploader = () => {
   };
 
   return (
-    <Container>
+    <div className="container">
+      {/* Display the compressed or original image */}
       {compressedImage ? (
-        <ImageContainer>
-          <ImagePreview src={compressedImage} alt="Compressed Image" />
-        </ImageContainer>
+        <div className="image-container">
+          <img src={compressedImage} alt="Compressed version of the uploaded file" className="image-preview" />
+        </div>
       ) : (
         selectedImage && (
-          <ImageContainer>
-            <ImagePreview src={selectedImage} alt="Original Image" />
-          </ImageContainer>
+          <div className="image-container">
+            <img src={selectedImage} alt="Original uploaded file" className="image-preview" />
+          </div>
         )
       )}
 
-      <ControlContainer>
-        <CenteredInputContainer>
-          <HelperText>Step 1: Select an image to compress</HelperText>
-          <FileLabel htmlFor="file-upload">
+      <div className="control-container">
+        <div className="centered-input-container">
+          {/* Step 1: File upload section */}
+          <p className="helper-text">Step 1: Select an image to compress</p>
+          <label htmlFor="file-upload" className="file-label">
             <FaUpload style={{ marginRight: '5px' }} /> Select Image
-          </FileLabel>
-          <FileInput
+          </label>
+          <input
             id="file-upload"
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
+            className="file-input"
             disabled={!!compressedImage}
           />
-          {/* Display original image name after selection */}
-          {fileName && <p style={{ marginTop: '10px' }}> {fileName}</p>}
-        </CenteredInputContainer>
+          <h5>* Images are not stored anywhere. <br /> No backend / server is involved *</h5>
+          {/* Display uploaded file name */}
+          {fileName && <p style={{ marginTop: '10px' }}>{fileName}</p>}
+        </div>
 
         {selectedImage && (
           <>
-            <HelperText>Step 2: Select Compression Rate</HelperText>
-            <Slider
+            {/* Step 2: Compression rate selection */}
+            <p className="helper-text">Step 2: Select Compression Rate</p>
+            <input
               type="range"
               min="10"
               max="100"
               value={compressionRate}
               onChange={(e) => setCompressionRate(parseInt(e.target.value))}
+              className="slider"
             />
             <p>Compression Rate: {compressionRate}%</p>
 
+            {/* Warning for high compression rates */}
             {showWarning && (
-              <WarningText>
-                Warning: High compression (more than 85%) may lead to significant quality loss and distortion!
-              </WarningText>
+              <p className="warning-text">
+                High compression (more than 85%) may lead to significant quality loss and distortion!
+              </p>
             )}
 
-            <InfoTable>
+            {/* Table showing original and compressed sizes */}
+            <table className="info-table">
               <tbody>
-                <TableRow>
-                  <TableData>Original Size:</TableData>
-                  <TableData>{formatSize(originalSize)}</TableData>
-                </TableRow>
+                <tr className="table-row">
+                  <td className="table-data">Original Size:</td>
+                  <td className="table-data">{formatSize(originalSize)}</td>
+                </tr>
                 {compressedImage && (
-                  <TableRow>
-                    <TableData>Compressed Size:</TableData>
-                    <TableData>{formatSize(compressedSize)}</TableData>
-                  </TableRow>
+                  <tr className="table-row">
+                    <td className="table-data">Compressed Size:</td>
+                    <td className="table-data">{formatSize(compressedSize)}</td>
+                  </tr>
                 )}
               </tbody>
-            </InfoTable>
+            </table>
 
-            <Button onClick={handleCompression} disabled={isProcessing}>
-              {isProcessing ? 'Processing...' : (
+            {/* Compression button */}
+            <button onClick={handleCompression} className="button" disabled={isProcessing}>
+              {isProcessing ? (
+                'Processing...'
+              ) : (
                 <>
                   <FaCompress style={{ marginRight: '5px' }} />
                   {(showError || compressedImage) ? 'Compress Image Again' : 'Compress Image'}
                 </>
               )}
-            </Button>
+            </button>
           </>
         )}
 
+        {/* Error message for compression failure */}
         {showError && (
-          <ErrorText>
+          <p className="error-text">
             Image cannot be compressed this much because of its properties. Please try changing Compression Rate.
-          </ErrorText>
+          </p>
         )}
 
+        {/* Button to download compressed image */}
         {compressedImage && !showError && (
           <>
-            <Button onClick={() => downloadCompressedImage(compressedImage)}>
+            <button onClick={() => downloadCompressedImage(compressedImage)} className="button">
               <FaDownload style={{ marginRight: '5px' }} /> Download Compressed Image
-            </Button>
+            </button>
           </>
         )}
-
-        {(compressedImage || showError) && (
-          <CompressAnotherButton onClick={handleCompressAnother}>
-            <FaImage style={{ marginRight: '5px' }} /> Compress Another Image
-          </CompressAnotherButton>
-        )}
-      </ControlContainer>
-    </Container>
+      </div>
+    </div>
   );
 };
 
